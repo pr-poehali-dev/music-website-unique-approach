@@ -1,14 +1,324 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useEffect, useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import Icon from '@/components/ui/icon';
 
-const Index = () => {
+export default function Index() {
+  const [activeSection, setActiveSection] = useState('home');
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const sections = ['home', 'music', 'bio'];
+      const scrollPosition = window.scrollY + window.innerHeight / 2;
+
+      for (const section of sections) {
+        const element = document.getElementById(section);
+        if (element) {
+          const { offsetTop, offsetHeight } = element;
+          if (scrollPosition >= offsetTop && scrollPosition < offsetTop + offsetHeight) {
+            setActiveSection(section);
+            break;
+          }
+        }
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const scrollToSection = (id: string) => {
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const tracks = [
+    { id: 1, title: 'Первый трек', duration: '3:45' },
+    { id: 2, title: 'Второй трек', duration: '4:12' },
+    { id: 3, title: 'Третий трек', duration: '3:28' },
+    { id: 4, title: 'Четвёртый трек', duration: '5:03' },
+  ];
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4 color-black text-black">Добро пожаловать!</h1>
-        <p className="text-xl text-gray-600">тут будет отображаться ваш проект</p>
-      </div>
+    <div className="min-h-screen bg-black text-white">
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-md border-b border-white/10">
+        <div className="container mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            <h1 className="font-heading text-2xl font-bold tracking-tight">
+              НЕСТАНДАРТНЫЙ ПОДХОД
+            </h1>
+            <div className="flex gap-8">
+              {[
+                { id: 'home', label: 'Главная' },
+                { id: 'music', label: 'Музыка' },
+                { id: 'bio', label: 'Биография' },
+              ].map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => scrollToSection(item.id)}
+                  className={`font-heading text-sm font-medium transition-colors relative group ${
+                    activeSection === item.id ? 'text-primary' : 'text-white/60 hover:text-white'
+                  }`}
+                >
+                  {item.label}
+                  <span
+                    className={`absolute -bottom-1 left-0 h-0.5 bg-primary transition-all ${
+                      activeSection === item.id ? 'w-full' : 'w-0 group-hover:w-full'
+                    }`}
+                  />
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      <section
+        id="home"
+        className="min-h-screen flex items-center justify-center relative overflow-hidden"
+      >
+        <div 
+          className="absolute inset-0 bg-cover bg-center"
+          style={{
+            backgroundImage: 'url(https://cdn.poehali.dev/projects/7ea5e62b-967e-43ec-beca-a975ddb7c057/files/c16f70a4-7454-4460-9b2a-2838d9995471.jpg)',
+            filter: 'brightness(0.4)'
+          }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-br from-black/60 via-black/40 to-primary/20" />
+        <div className="absolute inset-0 opacity-20">
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/30 rounded-full blur-3xl animate-pulse" />
+          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl animate-pulse delay-1000" />
+        </div>
+        
+        <div className="container mx-auto px-6 relative z-10">
+          <div className="max-w-4xl mx-auto text-center animate-fade-in">
+            <h2 className="font-heading text-7xl md:text-9xl font-black mb-6 tracking-tighter">
+              НЕСТАНДАРТНЫЙ
+              <br />
+              <span className="bg-gradient-to-r from-primary via-pink-500 to-primary bg-clip-text text-transparent">
+                ПОДХОД
+              </span>
+            </h2>
+            <p className="text-xl md:text-2xl text-white/60 mb-12 font-light">
+              Музыка, которая бросает вызов стандартам
+            </p>
+            <div className="flex gap-4 justify-center">
+              <Button
+                size="lg"
+                className="bg-primary hover:bg-primary/90 text-white font-heading font-semibold px-8"
+                onClick={() => scrollToSection('music')}
+              >
+                <Icon name="Play" size={20} className="mr-2" />
+                Слушать музыку
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                className="border-white/20 hover:bg-white/10 font-heading font-semibold px-8"
+                onClick={() => scrollToSection('bio')}
+              >
+                Узнать больше
+              </Button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="music" className="min-h-screen py-24 relative">
+        <div className="container mx-auto px-6">
+          <div className="max-w-4xl mx-auto">
+            <h3 className="font-heading text-5xl md:text-6xl font-black mb-4">
+              МУЗЫКА
+            </h3>
+            <p className="text-white/60 text-lg mb-12">
+              Последние релизы и популярные треки
+            </p>
+
+            <div className="grid gap-4">
+              {tracks.map((track, index) => (
+                <Card
+                  key={track.id}
+                  className="bg-white/5 border-white/10 hover:bg-white/10 transition-all duration-300 hover:border-primary/50 group cursor-pointer"
+                  style={{ animationDelay: `${index * 100}ms` }}
+                >
+                  <div className="p-6 flex items-center justify-between">
+                    <div className="flex items-center gap-6">
+                      <div className="w-16 h-16 rounded-lg bg-gradient-to-br from-primary to-pink-500 flex items-center justify-center">
+                        <Icon name="Music" size={28} className="text-white" />
+                      </div>
+                      <div>
+                        <h4 className="font-heading font-semibold text-lg group-hover:text-primary transition-colors">
+                          {track.title}
+                        </h4>
+                        <p className="text-white/50 text-sm">Нестандартный подход</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-6">
+                      <span className="text-white/50 font-mono text-sm">{track.duration}</span>
+                      <Button
+                        size="icon"
+                        className="bg-primary/20 hover:bg-primary text-white border-0"
+                      >
+                        <Icon name="Play" size={18} />
+                      </Button>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+
+            <div className="mt-12 grid grid-cols-3 gap-4">
+              <Card className="bg-white/5 border-white/10 p-6 text-center">
+                <div className="flex justify-center mb-3">
+                  <Icon name="Music2" size={32} className="text-primary" />
+                </div>
+                <p className="text-3xl font-heading font-bold mb-1">12</p>
+                <p className="text-white/50 text-sm">Треков</p>
+              </Card>
+              <Card className="bg-white/5 border-white/10 p-6 text-center">
+                <div className="flex justify-center mb-3">
+                  <Icon name="Users" size={32} className="text-primary" />
+                </div>
+                <p className="text-3xl font-heading font-bold mb-1">5.2K</p>
+                <p className="text-white/50 text-sm">Слушателей</p>
+              </Card>
+              <Card className="bg-white/5 border-white/10 p-6 text-center">
+                <div className="flex justify-center mb-3">
+                  <Icon name="Disc3" size={32} className="text-primary" />
+                </div>
+                <p className="text-3xl font-heading font-bold mb-1">3</p>
+                <p className="text-white/50 text-sm">Альбома</p>
+              </Card>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="bio" className="min-h-screen py-24 relative">
+        <div className="container mx-auto px-6">
+          <div className="max-w-4xl mx-auto">
+            <h3 className="font-heading text-5xl md:text-6xl font-black mb-4">
+              БИОГРАФИЯ
+            </h3>
+            <p className="text-white/60 text-lg mb-12">
+              История артиста и музыкальный путь
+            </p>
+
+            <div className="space-y-8">
+              <Card className="bg-white/5 border-white/10 p-0 overflow-hidden">
+                <div className="grid md:grid-cols-2 gap-0">
+                  <div 
+                    className="h-64 md:h-auto bg-cover bg-center"
+                    style={{
+                      backgroundImage: 'url(https://cdn.poehali.dev/projects/7ea5e62b-967e-43ec-beca-a975ddb7c057/files/0136f0ca-88a1-4054-84e7-c1fafdef8fd6.jpg)'
+                    }}
+                  />
+                  <div className="p-8">
+                    <h4 className="font-heading text-2xl font-bold mb-4 text-primary">
+                      О проекте
+                    </h4>
+                    <p className="text-white/70 leading-relaxed mb-4">
+                      «Нестандартный подход» — это больше, чем просто музыка. Это философия создания 
+                      звука, который не вписывается в традиционные рамки жанров. Проект родился из 
+                      желания экспериментировать с формой и содержанием, создавая уникальное звучание.
+                    </p>
+                    <p className="text-white/70 leading-relaxed">
+                      Каждый трек — это исследование границ между электроникой, акустикой и 
+                      эмоциональной глубиной. Музыка создаётся не для фона, а для полного погружения.
+                    </p>
+                  </div>
+                </div>
+              </Card>
+
+              <Card className="bg-white/5 border-white/10 p-8">
+                <h4 className="font-heading text-2xl font-bold mb-6 text-primary">
+                  Творческий путь
+                </h4>
+                <div className="space-y-6">
+                  <div className="flex gap-6">
+                    <div className="flex-shrink-0">
+                      <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center">
+                        <Icon name="Calendar" size={24} className="text-primary" />
+                      </div>
+                    </div>
+                    <div>
+                      <h5 className="font-heading font-semibold text-lg mb-2">2020 — Начало</h5>
+                      <p className="text-white/60">
+                        Запуск проекта и первые эксперименты со звуком. Выпуск дебютного EP.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex gap-6">
+                    <div className="flex-shrink-0">
+                      <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center">
+                        <Icon name="Disc" size={24} className="text-primary" />
+                      </div>
+                    </div>
+                    <div>
+                      <h5 className="font-heading font-semibold text-lg mb-2">2022 — Прорыв</h5>
+                      <p className="text-white/60">
+                        Релиз первого полноформатного альбома, получившего признание критиков.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex gap-6">
+                    <div className="flex-shrink-0">
+                      <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center">
+                        <Icon name="Sparkles" size={24} className="text-primary" />
+                      </div>
+                    </div>
+                    <div>
+                      <h5 className="font-heading font-semibold text-lg mb-2">2024 — Сегодня</h5>
+                      <p className="text-white/60">
+                        Продолжение экспериментов, коллаборации и создание новых звуковых ландшафтов.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </Card>
+
+              <div className="flex gap-4 justify-center pt-8">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="border-white/20 hover:bg-white/10 font-heading"
+                >
+                  <Icon name="Instagram" size={20} className="mr-2" />
+                  Instagram
+                </Button>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="border-white/20 hover:bg-white/10 font-heading"
+                >
+                  <Icon name="Youtube" size={20} className="mr-2" />
+                  YouTube
+                </Button>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="border-white/20 hover:bg-white/10 font-heading"
+                >
+                  <Icon name="Music" size={20} className="mr-2" />
+                  Spotify
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <footer className="border-t border-white/10 py-12">
+        <div className="container mx-auto px-6">
+          <div className="max-w-4xl mx-auto text-center">
+            <p className="text-white/40 text-sm">
+              © 2024 Нестандартный подход. Все права защищены.
+            </p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
-};
-
-export default Index;
+}
