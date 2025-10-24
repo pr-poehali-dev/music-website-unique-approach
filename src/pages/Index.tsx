@@ -14,6 +14,12 @@ interface Track {
 export default function Index() {
   const [activeSection, setActiveSection] = useState('home');
   const [currentTrack, setCurrentTrack] = useState<Track | null>(null);
+  const [tracks, setTracks] = useState<Track[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    fetchTracks();
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -36,19 +42,24 @@ export default function Index() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const fetchTracks = async () => {
+    try {
+      const response = await fetch('https://functions.poehali.dev/dcb4a166-4423-4618-af6d-90fc6c42d2b3');
+      const data = await response.json();
+      setTracks(data.tracks || []);
+    } catch (error) {
+      console.error('Failed to fetch tracks:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
     if (element) {
       element.scrollIntoView({ behavior: 'smooth' });
     }
   };
-
-  const tracks: Track[] = [
-    { id: 1, title: 'Первый трек', duration: '3:45', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3' },
-    { id: 2, title: 'Второй трек', duration: '4:12', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3' },
-    { id: 3, title: 'Третий трек', duration: '3:28', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3' },
-    { id: 4, title: 'Четвёртый трек', duration: '5:03', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3' },
-  ];
 
   const handlePlayTrack = (track: Track) => {
     setCurrentTrack(track);
@@ -142,15 +153,45 @@ export default function Index() {
       <section id="music" className="min-h-screen py-24 relative">
         <div className="container mx-auto px-6">
           <div className="max-w-4xl mx-auto">
-            <h3 className="font-heading text-5xl md:text-6xl font-black mb-4">
-              МУЗЫКА
-            </h3>
-            <p className="text-white/60 text-lg mb-12">
-              Последние релизы и популярные треки
-            </p>
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h3 className="font-heading text-5xl md:text-6xl font-black">
+                  МУЗЫКА
+                </h3>
+                <p className="text-white/60 text-lg mt-2">
+                  Последние релизы и популярные треки
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                className="border-primary/50 hover:bg-primary/10 text-primary"
+                onClick={() => window.location.href = '/admin'}
+              >
+                <Icon name="Upload" size={18} className="mr-2" />
+                Загрузить музыку
+              </Button>
+            </div>
 
-            <div className="grid gap-4">
-              {tracks.map((track, index) => (
+            {isLoading ? (
+              <div className="text-center py-12">
+                <Icon name="Loader2" size={32} className="text-primary animate-spin mx-auto" />
+                <p className="text-white/50 mt-4">Загрузка треков...</p>
+              </div>
+            ) : tracks.length === 0 ? (
+              <div className="text-center py-12">
+                <Icon name="Music" size={48} className="text-white/20 mx-auto mb-4" />
+                <p className="text-white/50 mb-4">Пока нет загруженных треков</p>
+                <Button
+                  variant="outline"
+                  className="border-primary/50 hover:bg-primary/10 text-primary"
+                  onClick={() => window.location.href = '/admin'}
+                >
+                  Загрузить первый трек
+                </Button>
+              </div>
+            ) : (
+              <div className="grid gap-4 mt-12">
+                {tracks.map((track, index) => (
                 <Card
                   key={track.id}
                   className="bg-white/5 border-white/10 hover:bg-white/10 transition-all duration-300 hover:border-primary/50 group cursor-pointer"
@@ -181,16 +222,18 @@ export default function Index() {
                   </div>
                 </Card>
               ))}
-            </div>
+              </div>
+            )}
 
-            <div className="mt-12 grid grid-cols-3 gap-4">
-              <Card className="bg-white/5 border-white/10 p-6 text-center">
-                <div className="flex justify-center mb-3">
-                  <Icon name="Music2" size={32} className="text-primary" />
-                </div>
-                <p className="text-3xl font-heading font-bold mb-1">12</p>
-                <p className="text-white/50 text-sm">Треков</p>
-              </Card>
+            {tracks.length > 0 && (
+              <div className="mt-12 grid grid-cols-3 gap-4">
+                <Card className="bg-white/5 border-white/10 p-6 text-center">
+                  <div className="flex justify-center mb-3">
+                    <Icon name="Music2" size={32} className="text-primary" />
+                  </div>
+                  <p className="text-3xl font-heading font-bold mb-1">{tracks.length}</p>
+                  <p className="text-white/50 text-sm">Треков</p>
+                </Card>
               <Card className="bg-white/5 border-white/10 p-6 text-center">
                 <div className="flex justify-center mb-3">
                   <Icon name="Users" size={32} className="text-primary" />
@@ -205,7 +248,8 @@ export default function Index() {
                 <p className="text-3xl font-heading font-bold mb-1">3</p>
                 <p className="text-white/50 text-sm">Альбома</p>
               </Card>
-            </div>
+              </div>
+            )}
           </div>
         </div>
       </section>
