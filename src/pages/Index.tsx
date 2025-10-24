@@ -2,9 +2,18 @@ import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import Icon from '@/components/ui/icon';
+import AudioPlayer from '@/components/AudioPlayer';
+
+interface Track {
+  id: number;
+  title: string;
+  duration: string;
+  url?: string;
+}
 
 export default function Index() {
   const [activeSection, setActiveSection] = useState('home');
+  const [currentTrack, setCurrentTrack] = useState<Track | null>(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -34,12 +43,16 @@ export default function Index() {
     }
   };
 
-  const tracks = [
-    { id: 1, title: 'Первый трек', duration: '3:45' },
-    { id: 2, title: 'Второй трек', duration: '4:12' },
-    { id: 3, title: 'Третий трек', duration: '3:28' },
-    { id: 4, title: 'Четвёртый трек', duration: '5:03' },
+  const tracks: Track[] = [
+    { id: 1, title: 'Первый трек', duration: '3:45', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3' },
+    { id: 2, title: 'Второй трек', duration: '4:12', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3' },
+    { id: 3, title: 'Третий трек', duration: '3:28', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3' },
+    { id: 4, title: 'Четвёртый трек', duration: '5:03', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3' },
   ];
+
+  const handlePlayTrack = (track: Track) => {
+    setCurrentTrack(track);
+  };
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -160,6 +173,7 @@ export default function Index() {
                       <Button
                         size="icon"
                         className="bg-primary/20 hover:bg-primary text-white border-0"
+                        onClick={() => handlePlayTrack(track)}
                       >
                         <Icon name="Play" size={18} />
                       </Button>
@@ -319,6 +333,8 @@ export default function Index() {
           </div>
         </div>
       </footer>
+
+      <AudioPlayer track={currentTrack} onClose={() => setCurrentTrack(null)} />
     </div>
   );
 }
